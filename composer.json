@@ -1,0 +1,22 @@
+{
+  "name": "chuhlomin/rtm-stat",
+  "description": "",
+  "minimum-stability": "dev",
+  "license": "MIT License",
+  "authors": [
+    {
+      "name": "Konstantin Chukhlomin",
+      "email": "chuhlomin@gmail.com"
+    }
+  ],
+  "require": {
+    "bartosz-maciaszek/php-rtm": "1.0.4",
+    "symfony/console": "2.8.x-dev",
+    "symfony/yaml": "2.8.x-dev"
+  },
+  "autoload": {
+    "psr-4": {
+      "app\\": "app/"
+    }
+  }
+}
