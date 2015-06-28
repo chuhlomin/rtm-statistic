@@ -34,7 +34,7 @@ nano app/config/default.yaml
 ## Usage
 
 ```
-php cli.php 2015-01-05 2015-03-30 "1 week"
+php cli.php rtm:stat 2015-01-05 2015-03-30 "1 week"
 ````
 
 Which means: "grab statistic from 1/5/2015 to 3/20/2015 with interval equals of 1 week".

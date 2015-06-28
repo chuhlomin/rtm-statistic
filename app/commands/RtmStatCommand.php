@@ -30,7 +30,7 @@ class RtmStatCommand extends Command
     protected function configure()
     {
         $this
-            ->setName('rtm:grabber')
+            ->setName('rtm:stat')
             ->addArgument('start', InputArgument::REQUIRED, 'Format: 2015-06-27')
             ->addArgument('end', InputArgument::REQUIRED, 'Format: 2015-06-29 (including)')
             ->addArgument('interval', InputArgument::OPTIONAL, '"1 day", "1 week" or something like this', '1 week');
