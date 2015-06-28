@@ -11,7 +11,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class TestCommand extends Command
+class RtmStatCommand extends Command
 {
     /**
      * @var Rtm
@@ -113,9 +113,9 @@ class TestCommand extends Command
     }
 
     /**
-     * @param $listId
-     * @param $filter
-     * @return int
+     * @param integer $listId
+     * @param string $filter
+     * @return integer
      */
     private function getCountPerListAndFilter($listId, $filter)
     {
@@ -123,8 +123,8 @@ class TestCommand extends Command
     }
 
     /**
-     * @param $listId
-     * @param $filter
+     * @param integer $listId
+     * @param string $filter
      * @return array
      */
     private function getTasksPerListAndFilter($listId, $filter)
@@ -136,7 +136,7 @@ class TestCommand extends Command
     }
 
     /**
-     * @return int
+     * @return integer
      */
     private function getInboxListId()
     {
