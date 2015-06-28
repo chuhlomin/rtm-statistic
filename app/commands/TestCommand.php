@@ -49,13 +49,23 @@ class TestCommand extends Command
         $interval = \DateInterval::createFromDateString($intervalInput);
         $period = new \DatePeriod($start, $interval, $end);
 
+        $file = fopen(ROOT . '/data/' . date('Y-m-d_H:i:s') . substr((string)microtime(), 1, 8) . '.csv', 'w+');
+
+        fwrite(
+            $file,
+            sprintf(
+                "start: %s\nend: %s\ninterval: %s\n\n",
+                $startInput,
+                $endInput,
+                $intervalInput
+            )
+        );
+
         foreach ($period as $date) {
             /** @var \DateTime $date */
             $dateFormatted = $date->format('Y-m-d');
             $nextPeriod = $date->add($interval);
             $nextPeriodFormatted = $nextPeriod->format('Y-m-d');
-
-            $output->write($dateFormatted . "\t");
 
             $tasks = $this->getTasksPerListAndFilter(
                 $listId,
@@ -72,6 +82,7 @@ class TestCommand extends Command
             }
 
             $result = [
+                'date' => $dateFormatted,
                 'completed' => $this->getCountPerListAndFilter(
                     $listId,
                     sprintf(
@@ -92,8 +103,13 @@ class TestCommand extends Command
                 'days' => $lifeDays
             ];
 
-            $output->writeln(implode("\t", array_values($result)));
+            $dataLine = implode("\t", array_values($result)) . "\n";
+
+            fwrite($file, $dataLine);
+            $output->write($dataLine);
         }
+
+        fclose($file);
     }
 
     /**
