@@ -39,7 +39,7 @@ php cli.php rtm:stat 2015-01-05 2015-03-30 "1 week"
 
 Which means: "grab statistic from 1/5/2015 to 3/20/2015 with interval equals of 1 week".
 
-Command will create a CSV file with content like this:
+Command will create a CSV file in `data` directory with content like this:
 
 ```
 start: 2015-01-05
