@@ -20,15 +20,18 @@ Install dependencies:
 php composer.phar install
 ```
 
-Get you API Key & Secret on a page https://www.rememberthemilk.com/services/api/keys.rtm.
-
-Get you API Token (somehow... see TBD).
-
-Update config:
+Create config:
 
 ```
 cp app/config/example-default.yaml app/config/default.yaml
-nano app/config/default.yaml
+```
+
+Get you API Key & Secret on a page https://www.rememberthemilk.com/services/api/keys.rtm.
+
+Get you API Token:
+
+```
+php cli.php rtm:token
 ```
 
 ## Usage
@@ -70,4 +73,5 @@ Where
 ## TBD
 
 * Unit tests
-* Command for getting API Token
+* Build HTML report
+* Get same metrics from JIRA

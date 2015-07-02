@@ -3,7 +3,9 @@
 namespace app\commands;
 
 
+use app\exceptions\RtmException;
 use Rtm\Rtm;
+use Rtm\Service\Auth;
 use Rtm\Service\Lists;
 use Rtm\Service\Tasks;
 use Symfony\Component\Console\Command\Command;
@@ -41,6 +43,8 @@ class RtmStatCommand extends Command
         $startInput = $input->getArgument('start');
         $endInput = $input->getArgument('end');
         $intervalInput = $input->getArgument('interval');
+
+        $this->checkToken();
 
         $listId = $this->getInboxListId();
 
@@ -161,5 +165,24 @@ class RtmStatCommand extends Command
         }
 
         return $listId;
+    }
+
+    /**
+     * @throws \Exception
+     */
+    private function checkToken()
+    {
+        /** @var Auth $rtmAuth */
+        $rtmAuth = $this->rtm->getService(Rtm::SERVICE_AUTH);
+
+        try {
+            $rtmAuth->checkToken();
+        } catch (\Rtm\Exception $e) {
+            if ($e->getMessage() === 'rtm.auth.checkToken: Login failed / Invalid auth token') {
+                throw new RtmException('Invalid AuthToken. Run rtm:token command to get one.');
+            } else {
+                throw $e;
+            }
+        }
     }
 }

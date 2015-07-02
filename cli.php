@@ -17,6 +17,7 @@ $rtm = new \Rtm\Rtm($config['rtm']);
 
 $application = new \Symfony\Component\Console\Application();
 
+$application->add(new \app\commands\RtmTokenCommand($rtm));
 $application->add(new \app\commands\RtmStatCommand($rtm));
 
 $application->run();
