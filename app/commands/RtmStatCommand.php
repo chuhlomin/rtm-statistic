@@ -4,6 +4,7 @@ namespace app\commands;
 
 
 use app\exceptions\RtmException;
+use Rtm\Exception;
 use Rtm\Rtm;
 use Rtm\Service\Auth;
 use Rtm\Service\Lists;
@@ -48,12 +49,12 @@ class RtmStatCommand extends Command
 
         $listId = $this->getInboxListId();
 
-        $start = new \DateTime($startInput);
-        $end = new \DateTime($endInput);
         $interval = \DateInterval::createFromDateString($intervalInput);
-        $period = new \DatePeriod($start, $interval, $end);
 
-        $file = fopen(ROOT . '/data/' . date('Y-m-d_H:i:s') . substr((string)microtime(), 1, 8) . '.csv', 'w+');
+        $period = $this->getDatePeriod($startInput, $endInput, $interval);
+
+        $filePath = $this->getFilePath();
+        $file = fopen($filePath, 'w+');
 
         fwrite(
             $file,
@@ -66,46 +67,7 @@ class RtmStatCommand extends Command
         );
 
         foreach ($period as $date) {
-            /** @var \DateTime $date */
-            $dateFormatted = $date->format('Y-m-d');
-            $nextPeriod = $date->add($interval);
-            $nextPeriodFormatted = $nextPeriod->format('Y-m-d');
-
-            $tasks = $this->getTasksPerListAndFilter(
-                $listId,
-                sprintf('status:incomplete AND addedBefore:%s', $nextPeriodFormatted)
-            );
-
-            $lifeDays = 0;
-            foreach ($tasks as $task) {
-                $taskCreated = new \DateTime($task['created']);
-                $taskLife = $date->diff($taskCreated);
-
-                $taskLifeDays = (int) $taskLife->format('%a');
-                $lifeDays += $taskLifeDays;
-            }
-
-            $result = [
-                'date' => $dateFormatted,
-                'completed' => $this->getCountPerListAndFilter(
-                    $listId,
-                    sprintf(
-                        'completedAfter:%s AND completedBefore:%s',
-                        $dateFormatted,
-                        $nextPeriodFormatted
-                    )
-                ),
-                'added' => $this->getCountPerListAndFilter(
-                    $listId,
-                    sprintf(
-                        'addedAfter:%s AND addedBefore:%s',
-                        $dateFormatted,
-                        $nextPeriodFormatted
-                    )
-                ),
-                'total' => count($tasks),
-                'days' => $lifeDays
-            ];
+            $result = $this->getResultPerPeriod($date, $interval, $listId);
 
             $dataLine = implode("\t", array_values($result)) . "\n";
 
@@ -177,12 +139,83 @@ class RtmStatCommand extends Command
 
         try {
             $rtmAuth->checkToken();
-        } catch (\Rtm\Exception $e) {
+        } catch (Exception $e) {
             if ($e->getMessage() === 'rtm.auth.checkToken: Login failed / Invalid auth token') {
                 throw new RtmException('Invalid AuthToken. Run rtm:token command to get one.');
             } else {
                 throw $e;
             }
         }
+    }
+
+    /**
+     * @param $startInput
+     * @param $endInput
+     * @param $interval
+     * @return \DatePeriod
+     */
+    private function getDatePeriod($startInput, $endInput, $interval)
+    {
+        $start = new \DateTime($startInput);
+        $end = new \DateTime($endInput);
+        return new \DatePeriod($start, $interval, $end);
+    }
+
+    /**
+     * @return string
+     */
+    protected function getFilePath()
+    {
+        return ROOT . '/data/' . date('Y-m-d_H:i:s') . substr((string)microtime(), 1, 8) . '.csv';
+    }
+
+    /**
+     * @param $date
+     * @param $interval
+     * @param $listId
+     * @return array
+     */
+    private function getResultPerPeriod($date, $interval, $listId)
+    {
+        /** @var \DateTime $date */
+        $dateFormatted = $date->format('Y-m-d');
+        $nextPeriod = $date->add($interval);
+        $nextPeriodFormatted = $nextPeriod->format('Y-m-d');
+
+        $tasks = $this->getTasksPerListAndFilter(
+            $listId,
+            sprintf('status:incomplete AND addedBefore:%s', $nextPeriodFormatted)
+        );
+
+        $lifeDays = 0;
+        foreach ($tasks as $task) {
+            $taskCreated = new \DateTime($task['created']);
+            $taskLife = $date->diff($taskCreated);
+
+            $taskLifeDays = (int)$taskLife->format('%a');
+            $lifeDays += $taskLifeDays;
+        }
+
+        return [
+            'date' => $dateFormatted,
+            'completed' => $this->getCountPerListAndFilter(
+                $listId,
+                sprintf(
+                    'completedAfter:%s AND completedBefore:%s',
+                    $dateFormatted,
+                    $nextPeriodFormatted
+                )
+            ),
+            'added' => $this->getCountPerListAndFilter(
+                $listId,
+                sprintf(
+                    'addedAfter:%s AND addedBefore:%s',
+                    $dateFormatted,
+                    $nextPeriodFormatted
+                )
+            ),
+            'total' => count($tasks),
+            'days' => $lifeDays
+        ];
     }
 }
