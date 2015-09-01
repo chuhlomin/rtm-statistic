@@ -8,6 +8,10 @@ use Rtm\Rtm;
 use Rtm\Service\Auth;
 use Rtm\Service\Lists;
 use Rtm\Service\Tasks;
+use Symfony\Component\Console\Helper\QuestionHelper;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\Question;
 
 class RtmService implements ServiceInterface
 {
@@ -91,20 +95,47 @@ class RtmService implements ServiceInterface
     }
 
     /**
-     * @return string
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @param QuestionHelper $helper
+     * @return int
      */
-    public function getAuthUrl()
+    public function getToken(InputInterface $input, OutputInterface $output, QuestionHelper $helper)
     {
-        return $this->rtm->getAuthUrl();
-    }
+        $authUrl = $this->rtm->getAuthUrl();
 
-    /**
-     * @param $service
-     * @return \Rtm\Service\AbstractService
-     */
-    public function getService($service)
-    {
-        return $this->rtm->getService($service);
+        $output->writeln(
+            'Make sure that you have <info>ApiKey</info> and <info>Secret</info> ' .
+            'in your <comment>app/config/default.yaml</comment> file.' . PHP_EOL .
+            'You may get new one from page https://www.rememberthemilk.com/services/api/keys.rtm.' . PHP_EOL
+        );
+
+        $output->writeln(
+            sprintf(
+                'Open URL in browser: <options=bold>%s</options=bold>' . PHP_EOL .
+                'Login and copy <info>frob</info> value.' . PHP_EOL,
+                $authUrl
+            )
+        );
+
+        $question = new Question('Paste frob value: ');
+        $frob = $helper->ask($input, $output, $question);
+
+        /** @var Auth $authService */
+        $authService = $this->rtm->getService(Rtm::SERVICE_AUTH);
+
+        /** @var Auth $token */
+        $token = $authService->getToken($frob);
+
+        $output->writeln(
+            sprintf(
+                PHP_EOL . 'You <info>AuthToken</info> is <options=bold>%s</options=bold>' . PHP_EOL .
+                'Copy paste it to your <comment>app/config/default.yaml</comment> in rtm:AuthToken section.' . PHP_EOL,
+                $token->getToken()
+            )
+        );
+
+        return 0;
     }
 
     /**

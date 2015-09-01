@@ -36,7 +36,7 @@ class StatCommandTest extends \PHPUnit_Framework_TestCase
                     "start: 2015-05-01\n" .
                     "end: 2015-05-30\n" .
                     "interval: \"1 month\"\n\n" .
-                    "2015-05-01	30	40	1000	15\n"
+                    "2015-05-01	30	40	15	1000\n"
                 ]
             );
 
@@ -88,9 +88,9 @@ class StatCommandTest extends \PHPUnit_Framework_TestCase
                     "start: 2015-03-01\n" .
                     "end: 2015-05-30\n" .
                     "interval: \"1 month\"\n\n" .
-                    "2015-03-01	30	40	1000	15\n" .
-                    "2015-04-01	31	41	1001	16\n" .
-                    "2015-05-01	32	42	1002	17\n"
+                    "2015-03-01	30	40	15	1000\n" .
+                    "2015-04-01	31	41	16	1001\n" .
+                    "2015-05-01	32	42	17	1002\n"
                 ]
             );
 
