@@ -9,15 +9,23 @@ date_default_timezone_set('Europe/Moscow');
 define('DS', DIRECTORY_SEPARATOR);
 define('ROOT', __DIR__);
 
-$parser= new \Symfony\Component\Yaml\Parser();
+$container = new \Pimple\Container();
 
-$config = $parser->parse(file_get_contents(__DIR__.'/app/config/default.yaml'));
+$container['config'] = function() {
+    $parser = new \Symfony\Component\Yaml\Parser();
+    return $parser->parse(file_get_contents(__DIR__.'/app/config/default.yaml'));
+};
 
-$rtm = new \Rtm\Rtm($config['rtm']);
+$container['client_rtm'] = function($c) {
+    return new \Rtm\Rtm($c['config']['rtm']);
+};
 
-$application = new \Symfony\Component\Console\Application();
+$serviceFactory = new \app\models\service\Factory($container);
+$fs = new \Symfony\Component\Filesystem\Filesystem();
 
-$application->add(new \app\commands\RtmTokenCommand($rtm));
-$application->add(new \app\commands\RtmStatCommand($rtm));
+$application = new \app\models\Application('TaskStat', '1.0', $container);
+
+$application->add(new \app\commands\TokenCommand($serviceFactory));
+$application->add(new \app\commands\StatCommand($serviceFactory, $fs));
 
 $application->run();

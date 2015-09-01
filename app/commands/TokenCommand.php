@@ -3,6 +3,7 @@
 namespace app\commands;
 
 
+use app\models\service\Factory;
 use Rtm\Rtm;
 use Rtm\Service\Auth;
 use Symfony\Component\Console\Command\Command;
@@ -11,25 +12,27 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\Question;
 
-class RtmTokenCommand extends Command
+class TokenCommand extends Command
 {
-    /**
-     * @var Rtm
-     */
+    /** @var Factory */
+    private $factory;
+
+    /** @var \app\models\service\RtmService */
     private $rtm;
 
     /**
-     * @param Rtm $rtm
+     * @param Factory $factory
      */
-    public function __construct(Rtm $rtm)
+    public function __construct(Factory $factory)
     {
         parent::__construct();
-        $this->rtm = $rtm;
+        $this->factory = $factory;
+        $this->rtm = $this->factory->createTaskService('rtm');
     }
 
     protected function configure()
     {
-        $this->setName('rtm:token');
+        $this->setName('token');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
